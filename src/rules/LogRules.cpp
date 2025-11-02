@@ -269,8 +269,8 @@ namespace Core {
         DetectionCategory UserSnippetRule::getTargetCategory() const { return DetectionCategory::AnomalousLogs; }
         
         void UserSnippetRule::processLine(std::string_view line, ReportData& report, AnalysisContext& context) {
-            std::cmatch match;
-            if (std::regex_search(line.begin(), line.end(), match, pid_dump_regex)) {
+            std::smatch match;
+            if (std::regex_search(std::string(line), match, pid_dump_regex)) {
                 context.last_pid_dump = match[1].str();
             } else if (!context.last_pid_dump.empty() && line.find("Cmd line: zygote") != std::string_view::npos) {
                 std::string report_str = "Zygote process dump found (PID: " + context.last_pid_dump + ")";

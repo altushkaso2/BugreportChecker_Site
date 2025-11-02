@@ -165,7 +165,7 @@ namespace Core {
         }
         run_correlation_engine(result, context);
         
-        result.totalScore = std::min(10, result.totalScore);
+        result.totalScore = (std::min)(10, result.totalScore);
 
         progress_callback(100.0f);
     }

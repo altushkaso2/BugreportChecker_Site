@@ -65,8 +65,8 @@ namespace Core {
 
         void AppRootUsageRule::processLine(std::string_view line, ReportData& report, AnalysisContext&) {
             if (line.find("su") != std::string_view::npos && (line.find("allow") != std::string_view::npos || line.find("grant") != std::string_view::npos)) {
-                std::cmatch match;
-                if (std::regex_search(line.begin(), line.end(), match, su_log_regex)) {
+                std::smatch match;
+                if (std::regex_search(std::string(line), match, su_log_regex)) {
                     std::string app = match[1].matched ? match[1].str() : match[2].str();
                     if(!app.empty()) {
                         std::string report_str = "Root Usage: App '" + app + "' was granted root access.";
@@ -89,7 +89,7 @@ namespace Core {
         void TracerPidRule::processLine(std::string_view line, ReportData& report, AnalysisContext&) {
             if (line.rfind("TracerPid:", 0) == 0) {
                 std::string_view value_sv = line.substr(10);
-                value_sv.remove_prefix(std::min(value_sv.find_first_not_of(" \t"), value_sv.size()));
+                value_sv.remove_prefix((std::min)(value_sv.find_first_not_of(" \t"), value_sv.size()));
                 if(value_sv != "0") {
                     std::string report_str = "CRITICAL: Active process tracer detected (TracerPid is not 0). This may indicate Frida or other instrumentation frameworks.";
                     if (report.detections[DetectionCategory::Anomalies].insert(report_str).second) {

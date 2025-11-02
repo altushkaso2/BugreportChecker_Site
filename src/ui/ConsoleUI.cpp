@@ -31,7 +31,7 @@ namespace UI {
             size_t totalPages = (filteredItems.empty()) ? 1 : (filteredItems.size() + itemsPerPage - 1) / itemsPerPage;
             if (currentPage >= totalPages && totalPages > 0) currentPage = totalPages - 1;
             size_t startIndex = currentPage * itemsPerPage;
-            size_t endIndex = std::min(startIndex + itemsPerPage, filteredItems.size());
+            size_t endIndex = (std::min)(startIndex + itemsPerPage, filteredItems.size());
             if (filteredItems.empty()) console_.write("Nothing found.\n");
             else for (size_t i = startIndex; i < endIndex; ++i) console_.write("[" + std::to_string(i - startIndex + 1) + "] " + filteredItems[i].filename().string() + "\n");
             console_.write("\n--- Page " + std::to_string(filteredItems.empty() ? 0 : currentPage + 1) + " of " + std::to_string(totalPages) + " ---\n");

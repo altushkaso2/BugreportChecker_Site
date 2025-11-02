@@ -92,7 +92,7 @@ namespace Core {
         
         void ZygoteParentRule::processLine(std::string_view line, ReportData&, AnalysisContext& context) {
             auto next_token = [](std::string_view& sv) -> std::string_view {
-                sv.remove_prefix(std::min(sv.find_first_not_of(" \t"), sv.size()));
+                sv.remove_prefix((std::min)(sv.find_first_not_of(" \t"), sv.size()));
                 size_t pos = sv.find_first_of(" \t");
                 std::string_view token = sv.substr(0, pos);
                 sv.remove_prefix(pos == std::string_view::npos ? sv.size() : pos + 1);
@@ -162,7 +162,7 @@ namespace Core {
             }
 
             std::string_view line_for_root_check = line;
-            line_for_root_check.remove_prefix(std::min(line_for_root_check.find_first_not_of(" \t"), line_for_root_check.size()));
+            line_for_root_check.remove_prefix((std::min)(line_for_root_check.find_first_not_of(" \t"), line_for_root_check.size()));
 
             if (line_for_root_check.rfind("root", 0) == 0) {
                 size_t name_pos = line.find_last_of(" \t");
@@ -260,11 +260,11 @@ namespace Core {
             std::string report_str;
             if (line.find("LSPosed") != std::string_view::npos) {
                 context.lastDetectedFramework = "LSPosed";
-                std::cmatch match;
-                if (std::regex_search(line.begin(), line.end(), match, lsposed_version_regex)) {
+                std::smatch match;
+                if (std::regex_search(std::string(line), match, lsposed_version_regex)) {
                     report_str = "LSPosed framework detected (Version: " + match[1].str() + ")";
                 }
-                if (std::regex_search(line.begin(), line.end(), match, lsposed_target_regex)) {
+                if (std::regex_search(std::string(line), match, lsposed_target_regex)) {
                     std::string hook_report_str = "LSPosed Hook: Module active for app '" + match[1].str() + "'.";
                     if (report.detections[DetectionCategory::AppAnalysis].insert(hook_report_str).second) {
                        report.totalScore += getScore(hook_report_str);
@@ -339,15 +339,15 @@ namespace Core {
         
         void KernelSuLogRule::processLine(std::string_view line, ReportData& report, AnalysisContext&) {
             if (line.find("KernelSU") == std::string_view::npos && line.find("susfs") == std::string_view::npos) return;
-            std::cmatch match;
+            std::smatch match;
             std::string report_str;
-            if (std::regex_search(line.begin(), line.end(), match, init_regex)) {
+            if (std::regex_search(std::string(line), match, init_regex)) {
                 report_str = "KernelSU init interception detected for " + match[1].str();
             }
             else if (line.find("KernelSU: KPROBES is disabled") != std::string_view::npos) {
                 report_str = "KernelSU dmesg trace found (KPROBES disabled).";
             }
-            else if (std::regex_search(line.begin(), line.end(), match, susfs_regex)) {
+            else if (std::regex_search(std::string(line), match, susfs_regex)) {
                 report_str = "KernelSU module (susfs) detected, version " + match[1].str();
             }
             if (!report_str.empty()) {

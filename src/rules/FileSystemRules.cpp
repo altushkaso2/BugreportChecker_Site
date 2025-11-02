@@ -174,7 +174,7 @@ namespace Core {
         
         void InitRcRule::processLine(std::string_view line, ReportData& report, AnalysisContext&) {
             std::string_view trimmed_line = line;
-            trimmed_line.remove_prefix(std::min(trimmed_line.find_first_not_of(" \t"), trimmed_line.size()));
+            trimmed_line.remove_prefix((std::min)(trimmed_line.find_first_not_of(" \t"), trimmed_line.size()));
 
             const static std::set<std::string_view> service_keywords = {"service magisk", "service ksu", "service apatch"};
             for(const auto& keyword : service_keywords) {
