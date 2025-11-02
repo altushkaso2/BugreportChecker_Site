@@ -66,7 +66,8 @@ namespace Core {
         void AppRootUsageRule::processLine(std::string_view line, ReportData& report, AnalysisContext&) {
             if (line.find("su") != std::string_view::npos && (line.find("allow") != std::string_view::npos || line.find("grant") != std::string_view::npos)) {
                 std::smatch match;
-                if (std::regex_search(std::string(line), match, su_log_regex)) {
+                const std::string line_str(line);
+                if (std::regex_search(line_str, match, su_log_regex)) {
                     std::string app = match[1].matched ? match[1].str() : match[2].str();
                     if(!app.empty()) {
                         std::string report_str = "Root Usage: App '" + app + "' was granted root access.";

@@ -261,10 +261,11 @@ namespace Core {
             if (line.find("LSPosed") != std::string_view::npos) {
                 context.lastDetectedFramework = "LSPosed";
                 std::smatch match;
-                if (std::regex_search(std::string(line), match, lsposed_version_regex)) {
+                const std::string line_str(line);
+                if (std::regex_search(line_str, match, lsposed_version_regex)) {
                     report_str = "LSPosed framework detected (Version: " + match[1].str() + ")";
                 }
-                if (std::regex_search(std::string(line), match, lsposed_target_regex)) {
+                if (std::regex_search(line_str, match, lsposed_target_regex)) {
                     std::string hook_report_str = "LSPosed Hook: Module active for app '" + match[1].str() + "'.";
                     if (report.detections[DetectionCategory::AppAnalysis].insert(hook_report_str).second) {
                        report.totalScore += getScore(hook_report_str);
@@ -340,14 +341,15 @@ namespace Core {
         void KernelSuLogRule::processLine(std::string_view line, ReportData& report, AnalysisContext&) {
             if (line.find("KernelSU") == std::string_view::npos && line.find("susfs") == std::string_view::npos) return;
             std::smatch match;
+            const std::string line_str(line);
             std::string report_str;
-            if (std::regex_search(std::string(line), match, init_regex)) {
+            if (std::regex_search(line_str, match, init_regex)) {
                 report_str = "KernelSU init interception detected for " + match[1].str();
             }
             else if (line.find("KernelSU: KPROBES is disabled") != std::string_view::npos) {
                 report_str = "KernelSU dmesg trace found (KPROBES disabled).";
             }
-            else if (std::regex_search(std::string(line), match, susfs_regex)) {
+            else if (std::regex_search(line_str, match, susfs_regex)) {
                 report_str = "KernelSU module (susfs) detected, version " + match[1].str();
             }
             if (!report_str.empty()) {

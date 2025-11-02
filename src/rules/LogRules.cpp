@@ -270,7 +270,8 @@ namespace Core {
         
         void UserSnippetRule::processLine(std::string_view line, ReportData& report, AnalysisContext& context) {
             std::smatch match;
-            if (std::regex_search(std::string(line), match, pid_dump_regex)) {
+            const std::string line_str(line);
+            if (std::regex_search(line_str, match, pid_dump_regex)) {
                 context.last_pid_dump = match[1].str();
             } else if (!context.last_pid_dump.empty() && line.find("Cmd line: zygote") != std::string_view::npos) {
                 std::string report_str = "Zygote process dump found (PID: " + context.last_pid_dump + ")";
