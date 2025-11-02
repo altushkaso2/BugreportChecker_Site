@@ -20,7 +20,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*/*.cpp")
 add_executable(BugReportChecker ${SOURCES})
 
 if (UNIX AND NOT APPLE)
-    target_link_libraries(ReportChecker pthread)
+    target_link_libraries(BugReportChecker pthread)
 endif()
 
 if(WIN32)
