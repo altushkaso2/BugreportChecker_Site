@@ -49,7 +49,8 @@ namespace Core {
             {"com.exynos.abuse", {"Exynos Abuse app detected", DetectionCategory::AppAnalysis}},
             {"com.google.android.apps.playconsole", {"Play Console app detected", DetectionCategory::AppAnalysis}},
             {"com.google.android.gms.playconsole", {"Play Console (Legacy) app detected", DetectionCategory::AppAnalysis}},
-            {"meow.helper", {"Meow Helper app detected", DetectionCategory::ProhibitedPackages}}
+            {"meow.helper", {"Meow Helper app detected", DetectionCategory::ProhibitedPackages}},
+            {"com.axlebolt.standoff2.xiaomi", {"Plutonium (Standoff 2 Cheat) package detected", DetectionCategory::ProhibitedPackages}}
         }) {}
 
         std::vector<std::string> ProhibitedPackagesRule::getTargetSections() const {
@@ -80,6 +81,7 @@ namespace Core {
             if (detectionMessage.find("Xposed") != std::string::npos || detectionMessage.find("LSPosed") != std::string::npos) return 4;
             if (detectionMessage.find("Hide My Root") != std::string::npos || detectionMessage.find("SafetyNet Fix") != std::string::npos || detectionMessage.find("Amarok") != std::string::npos) return 3;
             if (detectionMessage.find("Lucky Patcher") != std::string::npos || detectionMessage.find("Game Guardian") != std::string::npos || detectionMessage.find("VirtualXposed") != std::string::npos) return 4;
+            if (detectionMessage.find("Plutonium (Standoff 2 Cheat)") != std::string::npos) return 4;
             if (detectionMessage.find("TitaniumBackup") != std::string::npos) return 2;
             if (detectionMessage.find("AdAway") != std::string::npos) return 1;
             if (detectionMessage.find("Hide My Applist") != std::string::npos) return 3;
