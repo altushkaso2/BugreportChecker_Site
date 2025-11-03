@@ -8,6 +8,7 @@ namespace Core {
         
         void MountAnalysisRule::processLine(std::string_view line, ReportData& report, AnalysisContext&) {
             std::string report_str;
+            
             if (line.find("/data/adb/modules") != std::string_view::npos && (line.find(" /system ") != std::string_view::npos || line.find(" /vendor ") != std::string_view::npos)) {
                 report_str = "Magic Mount: System partition mounted from Magisk modules directory.";
             } else if (line.find("/data/adb") != std::string_view::npos) {
@@ -16,6 +17,14 @@ namespace Core {
                 report_str = "Magisk Alpha directory mount detected.";
             } else if (line.rfind("tmpfs on /sbin", 0) == 0) {
                 report_str = "Suspicious Mount: Magisk's tmpfs sbin overlay detected.";
+            } else if (line.find("tmpfs magisk") != std::string_view::npos) {
+                report_str = "Suspicious Mount: Magisk's tmpfs (magisk) detected.";
+            } else if (line.find("/debug_ramdisk/.magisk/worker") != std::string_view::npos) {
+                report_str = "Suspicious Mount: Magisk's worker directory detected in mountinfo.";
+            } else if (line.find("/system/bin/magisk") != std::string_view::npos && line.find("tmpfs") != std::string_view::npos) {
+                report_str = "High-Confidence: Magisk binary is directly mounted over /system/bin/magisk.";
+            } else if (line.find("/system/bin") != std::string_view::npos && line.find("tmpfs magisk") != std::string_view::npos) {
+                report_str = "High-Confidence: Magisk tmpfs overlay detected on /system/bin.";
             }
 
             if (!report_str.empty()) {
@@ -30,6 +39,10 @@ namespace Core {
             if (detectionMessage.find("Magisk Directory Mount:") != std::string::npos) return 4;
             if (detectionMessage.find("Magisk Alpha directory mount") != std::string::npos) return 5;
             if (detectionMessage.find("tmpfs sbin overlay") != std::string::npos) return 3;
+            if (detectionMessage.find("tmpfs (magisk) detected") != std::string::npos) return 5;
+            if (detectionMessage.find("Magisk's worker directory") != std::string::npos) return 6;
+            if (detectionMessage.find("Magisk binary is directly mounted") != std::string::npos) return 7;
+            if (detectionMessage.find("Magisk tmpfs overlay detected on /system/bin") != std::string::npos) return 7;
             return 0;
         }
 

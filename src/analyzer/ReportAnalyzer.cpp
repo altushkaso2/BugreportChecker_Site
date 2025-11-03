@@ -111,7 +111,51 @@ namespace Core {
         }
     }
 
-    void ReportAnalyzer::analyze(const fs::path& reportPath, const std::function<void(float)>& progress_callback, ReportData& result) const {
+    void ReportAnalyzer::analyze_proc_mountinfo(const fs::path& procDir, const std::map<std::string, std::vector<IDetectionRule*>>& rule_map, ReportData& result, AnalysisContext& context) const {
+        result.debugLog.push_back("[DEBUG] Starting mountinfo analysis in " + procDir.string());
+        auto it = rule_map.find("MOUNTS");
+        if (it == rule_map.end()) {
+            result.debugLog.push_back("[DEBUG] No rules found for MOUNTS section, skipping mountinfo scan.");
+            return;
+        }
+        const auto& mount_rules = it->second;
+
+        try {
+            for (const auto& entry : fs::recursive_directory_iterator(procDir)) {
+                if (entry.is_regular_file() && entry.path().filename() == "mountinfo") {
+                    std::ifstream file(entry.path());
+                    std::string line;
+                    while (std::getline(file, line)) {
+                        if (!line.empty() && line.back() == '\r') line.pop_back();
+                        std::string_view sv(line);
+                        for (auto* rule : mount_rules) {
+                            rule->processLine(sv, result, context);
+                        }
+                    }
+                }
+            }
+        } catch (const fs::filesystem_error& e) {
+            result.debugLog.push_back("[WARNING] Filesystem error while scanning /proc: " + std::string(e.what()));
+        }
+    }
+
+
+    void ReportAnalyzer::analyze(const fs::path& extractedReportDir, const std::function<void(float)>& progress_callback, ReportData& result) const {
+        
+        fs::path reportPath;
+        for (const auto& entry : fs::directory_iterator(extractedReportDir)) {
+             std::string lower_filename = entry.path().filename().string();
+             std::transform(lower_filename.begin(), lower_filename.end(), lower_filename.begin(), [](unsigned char c){ return static_cast<char>(std::tolower(c)); });
+            if (entry.is_regular_file() && lower_filename.rfind("bugreport", 0) == 0 && lower_filename.find(".txt") != std::string::npos) {
+                reportPath = entry.path();
+                break;
+            }
+        }
+
+        if (reportPath.empty()) {
+            throw std::runtime_error("No bugreport-*.txt file found in the extracted directory.");
+        }
+
         std::ifstream file_for_size(reportPath, std::ios::binary | std::ios::ate);
         if (!file_for_size) throw std::runtime_error("File not found: " + reportPath.string());
         long long file_size = file_for_size.tellg();
@@ -151,12 +195,20 @@ namespace Core {
                 }
 
                 long long current_pos = file.tellg();
-                int progress = (file_size > 0) ? static_cast<int>(20.0f + 75.0f * static_cast<float>(current_pos) / file_size) : 20;
+                int progress = (file_size > 0) ? static_cast<int>(20.0f + 70.0f * static_cast<float>(current_pos) / file_size) : 20;
                 if (progress != last_progress) {
                     progress_callback(static_cast<float>(progress));
                     last_progress = progress;
                 }
             }
+        }
+
+        progress_callback(90.0f);
+        fs::path procDir = extractedReportDir / "FS" / "proc";
+        if (fs::exists(procDir)) {
+            analyze_proc_mountinfo(procDir, rule_map, result, context);
+        } else {
+            result.debugLog.push_back("[DEBUG] FS/proc directory not found, skipping mountinfo scan.");
         }
 
         progress_callback(95.0f);

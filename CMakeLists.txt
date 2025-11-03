@@ -13,11 +13,11 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
 
-include_directories(include)
+include_directories(include vendor/miniz)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*/*.cpp")
 
-add_executable(BugReportChecker ${SOURCES})
+add_executable(BugReportChecker ${SOURCES} "vendor/miniz/miniz.c")
 
 if (UNIX AND NOT APPLE)
     target_link_libraries(BugReportChecker pthread)
