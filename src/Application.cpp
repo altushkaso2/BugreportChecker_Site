@@ -140,15 +140,36 @@ void Application::handleAnalysis(bool isDebug, std::optional<fs::path> initial_p
                 }
             }
 
-            if (inner_zip_path.empty()) {
-                throw std::runtime_error("Could not find inner bugreport zip file.");
-            }
+            if (!inner_zip_path.empty()) {
+                std::cout << "Nested zip found. Extracting inner report data...\n";
+                if (!extractZip(inner_zip_path, TEMP_FINAL_DIR)) {
+                    throw std::runtime_error("Failed to extract inner zip file.");
+                }
+                final_report_dir = TEMP_FINAL_DIR;
+            } else {
+                std::cout << "No inner zip found. Checking for direct report files...\n";
+                bool txt_found = false;
+                for (const auto& entry : fs::directory_iterator(TEMP_EXTRACT_DIR)) {
+                     std::string lower_filename = entry.path().filename().string();
+                     std::transform(lower_filename.begin(), lower_filename.end(), lower_filename.begin(), [](unsigned char c){ return static_cast<char>(std::tolower(c)); });
+                    if (entry.is_regular_file() && lower_filename.rfind("bugreport", 0) == 0 && lower_filename.find(".txt") != std::string::npos) {
+                        txt_found = true;
+                        break;
+                    }
+                }
 
-            std::cout << "Extracting inner report data (with FS folder)...\n";
-            if (!extractZip(inner_zip_path, TEMP_FINAL_DIR)) {
-                throw std::runtime_error("Failed to extract inner zip file.");
+                if (txt_found) {
+                    std::cout << "Direct report files found. Using them directly.\n";
+                    std::error_code ec;
+                    fs::rename(TEMP_EXTRACT_DIR, TEMP_FINAL_DIR, ec);
+                    if (ec) {
+                         throw std::runtime_error("Failed to rename temp directory: " + ec.message());
+                    }
+                    final_report_dir = TEMP_FINAL_DIR;
+                } else {
+                    throw std::runtime_error("Archive contains no inner zip and no direct bugreport.txt file.");
+                }
             }
-            final_report_dir = TEMP_FINAL_DIR;
         } else {
             throw std::runtime_error("Unsupported file type: " + ext);
         }
