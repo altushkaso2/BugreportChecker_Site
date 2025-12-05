@@ -1,153 +1,102 @@
+# 🛡️ BugReport Checker (Web Edition)
 
-![Build Status](https://github.com/altushkaso2/BugReportChecker/actions/workflows/release.yml/badge.svg)
-![Latest Release](https://img.shields.io/github/v/release/altushkaso2/BugReportChecker?label=latest%20version)
-![Downloads](https://img.shields.io/github/downloads/altushkaso2/BugReportChecker/total?label=downloads)
-![Language](https://img.shields.io/github/languages/top/altushkaso2/BugReportChecker)
+![Build](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square&logo=github)
+![Version](https://img.shields.io/badge/latest%20version-v1.3-blue?style=flat-square)
+![Downloads](https://img.shields.io/github/downloads/altushkaso2/BugReportChecker/total?style=flat-square&label=downloads&color=yellow)
+![Language](https://img.shields.io/badge/c++-99.5%25-555555?style=flat-square&logo=c%2B%2B)
+![Platform](https://img.shields.io/badge/platform-Web%20(Wasm)-orange?style=flat-square&logo=googlechrome)
 
-Консольная утилита для быстрого анализа файлов `bugreport.txt` с устройств Android.
+**Мощный инструмент для анализа Android через `bugreport.txt`.**
 
-Она сканирует отчеты на наличие признаков модификации системы (root, Magisk, LSPosed, KernelSU и т.д.), кастомных сборок и других аномалий, а затем выставляет итоговый балл "опасности".
+Теперь работает прямо в браузере! Все вычисления происходят локально на вашем устройстве благодаря технологии **WebAssembly**.
 
-## 🚀 Демонстрация (Пример вывода)
+---
 
-Вот как выглядит финальный отчет в консоли:
+## 🌐 [ЗАПУСТИТЬ ОНЛАЙН ВЕРСИЮ](https://altushkaso2.github.io/BugReportChecker/)
+
+*(Нажмите на ссылку выше, чтобы открыть инструмент)*
+
+---
+
+## 🚀 Демонстрация (Результат анализа)
+
+После загрузки отчета вы получаете детальный анализ в современном интерфейсе:
 
 ```text
---- General Information ---
-Model: Pixel 6 Pro
-Android Version: 14
-Magisk Version: 27.0 (Alpha)
-Серийный номер: 123456ABCDEF
-Bootloader: Разблокирован (unlocked (cmdline))
-SELinux Status: Enforcing
-Build Fingerprint: google/raven/raven:14/AP11.231020.013/10811657:user/release-keys
+=== REPORT ANALYSIS RESULT ===
 
---- Analysis Results ---
+Model: Pixel 7 Pro
+Android Ver: 14
+Bootloader: Unlocked (orange)
+Root Status: Magisk Detected
 
-Final Score: 9/10
-Verdict: Critical. High-confidence evidence of system modification was detected.
+Risk Score: 9/10
+Verdict: CRITICAL
 
-[Root & Frameworks]: Detected
-- Magisk property detected (Version: 27.0) [Alpha]
-- Root Process: 'magiskd' process detected.
-- High-Confidence: Hooking framework trace 'libzygisk' found in crash log.
-- Zygisk library loaded into a process.
+[Root & Frameworks]
+- Magisk property detected (Version: 27.0)
+- Zygisk library loaded into a process
+- Root Process: 'magiskd' detected
 
-[Root Hiding & Evasion]: Detected
-- Play Integrity Fix property detected: ro.pif.name
+[Root Hiding & Evasion]
+- Play Integrity Fix property detected
+- TrickyStore log detected
 
-[File System & Mounts]: Detected
-- Magic Mount: System partition mounted from Magisk modules directory.
-
-... (и другие категории) ...
-
-Results saved to: Pixel_6_Pro_log.txt
+[Anomalous System Logs]
+- SELinux: Active Magisk process context detected
 ````
 
-## ✨ Основные фичи
+## ✨ Основные возможности
 
-**Кросплатформенность:** Работает на Windows, macOS и Linux.
+  * **⚡ Мгновенный анализ:** Использует скомпилированный C++ код прямо в браузере.
+  * **🔒 100% Приватность:** Ваши файлы не покидают ваш компьютер. Анализ идет в оперативной памяти браузера.
+  * **📦 Умная загрузка:** Просто перетащите `.zip` архив или `.txt` файл — программа сама найдет и распакует нужный лог.
+  * **🔍 Глубокое сканирование:**
+      * Поиск следов **Magisk, KernelSU, APatch**.
+      * Обнаружение **Zygisk, LSPosed, Frida**.
+      * Проверка статуса **Bootloader** и **SELinux**.
+      * Анализ монтирования файловой системы и процессов.
 
-**Глубокий анализ:** Использует более 40+ правил для обнаружения Magisk, KernelSU, LSPosed, Zygisk, Play Integrity Fix, BusyBox и многих других.
+## 🛠️ Сборка Web-версии (Для разработчиков)
 
-**Система Оценки:** Выдает простой и понятный балл от 0 (Чисто) до 10 (Критично).
+Если вы хотите собрать проект самостоятельно из исходников:
 
-**Детальный отчет:** Сохраняет полный лог анализа в `.txt` файл для дальнейшего изучения.
-
-**Нулевые зависимости:** Скомпилированные бинарники работают "из коробки" без установки чего-либо.
-
-## 🛠️ Как использовать (Для пользователей)
-
-### 1\. Скачать
-
-Перейдите в раздел **[Releases](https://www.google.com/search?q=https://github.com/altushkaso2/BugReportChecker/releases)** и скачайте архив для вашей операционной системы (Windows, Linux или macOS).
-
-### 2\. Запустить
-
-Это консольная утилита. Есть два способа запуска:
-
-#### Способ 1: Интерактивное меню
-
-Просто запустите программу без аргументов, чтобы открыть меню:
-
-```bash
-# Пример для всех операционных систем
-./BugReportChecker
-```
-
-Появится меню, где можно выбрать режим анализа. После выбора программа просканирует стандартные папки на наличие багрепортов.
-
-```text
-=====================================
-  DebugReport Checker  
-  (Created by altushkaso2)
-=====================================
-1) Analyze Report (Release)
-2) Analyze Report (Debug)
-3) Exit
--------------------------------------
-Select option: 
-```
-
-> [\!NOTE]
-> **Где программа ищет багрепорты:**
->
-> Утилита ищет файлы, содержащие `bugreport` в названии, в 5-ти местах:
->
-> 1.  **Домашняя директория** (`/home/username` или `C:\Users\username`)
-> 2.  **Рабочий стол**
-> 3.  **Загрузки**
-> 4.  **Папка `storage/downloads`** (для совместимости с Termux)
-> 5.  **Текущая директория** (откуда вы запустили `BugReportChecker`)
->
-> *(Логика поиска: `/src/Application.cpp` в функции `findBugReports()`)*
-
-#### Способ 2: Прямой запуск (Рекомендуемый)
-
-Вы можете передать путь к файлу `bugreport.txt` напрямую как аргумент.
-
-```bash
-# Пример для Linux/macOS
-./BugReportChecker /путь/к/вашему/bugreport.txt
-
-# Пример для Windows (CMD/PowerShell)
-.\BugReportChecker.exe C:\Users\Admin\Desktop\bugreport.txt
-```
-
-## 🖥️ Сборка из исходников (Для разработчиков)
-
-Для сборки проекта вам понадобится `CMake` и C++17 компилятор.
-
-1.  **Клонировать репозиторий**
+1.  **Установите Emscripten (EMSDK):**
 
     ```bash
-    git clone https://github.com/altushkaso2/BugReportChecker.git
-    cd BugReportChecker
+    git clone [https://github.com/emscripten-core/emsdk.git](https://github.com/emscripten-core/emsdk.git)
+    cd emsdk
+    ./emsdk install latest
+    ./emsdk activate latest
+    source ./emsdk_env.sh
     ```
 
-2.  **Создать папку для сборки**
+2.  **Скомпилируйте проект:**
 
     ```bash
-    mkdir build && cd build
+    # Шаг 1: Компиляция библиотеки miniz (C)
+    emcc -c vendor/miniz/miniz.c -I vendor/miniz -O3 -o miniz.o
+
+    # Шаг 2: Сборка всего проекта в WebAssembly (C++)
+    em++ src/wasm_bridge.cpp src/analyzer/*.cpp src/rules/*.cpp src/platform/*.cpp miniz.o \
+      -I include -I vendor/miniz \
+      -o docs/bugreport.js \
+      -std=c++17 -O3 --bind \
+      -s WASM=1 \
+      -s ALLOW_MEMORY_GROWTH=1 \
+      -s FORCE_FILESYSTEM=1 \
+      -s MODULARIZE=1 \
+      -s EXPORT_NAME="createModule" \
+      -s "EXPORTED_RUNTIME_METHODS=['FS']"
     ```
 
-3.  **Сконфигурировать (Release билд)**
-
-    ```bash
-    cmake .. -DCMAKE_BUILD_TYPE=Release
-    ```
-
-4.  **Собрать**
-
-    ```bash
-    cmake --build .
-    ```
-
-Бинарный файл `BugReportChecker` (или `BugReportChecker.exe`) появится в папке `build`.
+3.  **Запуск:**
+    Откройте файл `docs/index.html` через локальный сервер (например, `python3 -m http.server`).
 
 ## 📄 Лицензия
 
 Все права защищены.
+Code by altushkaso2.
 
 ```
 Have fun :D
